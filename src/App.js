@@ -12,13 +12,32 @@ import { CreateTodoButton } from './Components/CreateTodoButton';
 //   { text: 'LALALALA', completed: false },
 //   { text: 'Usar estados derivados', completed: true },
 // ];
-// localStorage.setItem('TODOS_V1', defaultTodos);
+// localStorage.setItem('TODOS_V1', JSON.stringify(defaultTodos));
 //localStorage.removeItem('TODOS_V1');
 
+function useLocalStorage(itemName, initialValue) {
+  const localStorageItem = localStorage.getItem(itemName);
+  let parsedItem;
+
+  if (!localStorageItem) {
+    localStorage.setItem(itemName, JSON.stringify(initialValue));
+    parsedItem = initialValue
+  } else {
+    parsedItem = JSON.parse(localStorageItem);
+  }
+
+  const [item, setItem] = React.useState(parsedItem);
+
+  const saveItem = (newItem) => {
+    localStorage.setItem(itemName, JSON.stringify(newItem));
+    setItem(newItem);
+  }
+
+  return [item, saveItem];
+}
+
 function App() {
-  const localStorageTodos = localStorage.getItem('TODOS_V1');
-  let parsedTodos = JSON.parse(localStorageTodos);
-  const [todos, setTodos] = React.useState(parsedTodos);
+  const [todos, saveTodos] = useLocalStorage('TODOS_V1', []);
   const [searchValue, setSearchValue] = React.useState('');
 
   const completedTodos = todos.filter(
@@ -39,8 +58,8 @@ function App() {
     const todoIndex = newTodos.findIndex(
       (todo) => todo.text === text
     );
-    newTodos[todoIndex].completed =true;
-    setTodos(newTodos);
+    newTodos[todoIndex].completed = true;
+    saveTodos(newTodos);
   }
 
   const deleteTodo = (text) => {
@@ -49,7 +68,7 @@ function App() {
       (todo) => todo.text === text
     );
     newTodos.splice(todoIndex, 1);
-    setTodos(newTodos);
+    saveTodos(newTodos);
   }
 
   return (
@@ -61,10 +80,10 @@ function App() {
       />
       <TodoList>
         {searchedTodos.map(todo => (
-          <TodoItem 
-            key={todo.text} 
-            text={todo.text} 
-            completed={todo.completed} 
+          <TodoItem
+            key={todo.text}
+            text={todo.text}
+            completed={todo.completed}
             onComplete={() => completeTodo(todo.text)}
             onDelete={() => deleteTodo(todo.text)}
           />
