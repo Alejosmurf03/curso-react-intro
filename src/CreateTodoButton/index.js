@@ -1,4 +1,4 @@
-import '../assets/style/CreateTodoButton.css';
+import './CreateTodoButton.css';
 
 function CreateTodoButton(){
     return(
